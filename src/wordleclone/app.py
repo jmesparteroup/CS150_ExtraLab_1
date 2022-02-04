@@ -9,7 +9,7 @@ from random import randint
 class Vault():
 
     def __init__(self,path) -> None:
-        self.resources_folder = f"{path}/resources/ "
+        self.resources_folder = f"{path}/resources/"
         self.guess_list, self.allowed_guesses = self.getGuessData()
         self.setGuessWord()
         
@@ -127,7 +127,7 @@ class WordleClone(toga.App):
         self.gridsize = 6 # nxn grid
         self.wordsize = 5
         self.alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        self.vault = Vault(str(self.path.app)) 
+        self.vault = Vault(str(self.paths.app)) 
 
         for attr in dir(self):
             print(attr)
@@ -146,7 +146,7 @@ class WordleClone(toga.App):
             'used_letter': self.used_letter
         }
 
-        self.Game = Game(self.gridsize, self.wordsize, interactables)
+        self.Game = Game(self.gridsize, self.wordsize, interactables, self.vault)
 
     def generate_ui(self):
         main_box = toga.Box(style=Pack(direction=COLUMN, alignment="center"))
