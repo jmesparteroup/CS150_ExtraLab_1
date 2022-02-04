@@ -7,7 +7,7 @@ from toga.style.pack import COLUMN, ROW
 from pathlib import Path
 from random import randint
 
-class Validator():
+class Vault():
 
     def __init__(self) -> None:
         self.guess_list, self.allowed_guesses = self.getGuessData()
@@ -57,9 +57,8 @@ class Game():
         self.isGameOver = False
         self.isWin = False
         
-        self.validator = Validator() 
+        self.vault = Vault() 
 
-        self.reset_ui = interactables['reset_ui']
         self.row_boxes = interactables['row_boxes']
         self.get_guess_input = interactables['guess_input']
         self.show_dialog = interactables['show_dialog']
@@ -69,11 +68,11 @@ class Game():
         if self.isGameOver:
             return
 
-        localSecret = self.validator.getSecret()
+        localSecret = self.vault.getSecret()
         guess = self.get_guess_input()
         score = 0
         
-        validatorCheck = self.validator.validate_guess(guess)
+        validatorCheck = self.vault.validate_guess(guess)
         
         if not validatorCheck[0]:
             error_message = validatorCheck[1]
@@ -110,7 +109,7 @@ class Game():
         self.current_guess_count += 1
         if self.current_guess_count > 5 and not self.isWin:
             self.isGameOver = True
-            self.show_dialog("Game Over!", f"You used up all your guesses.\nThe secret word was {self.validator.getSecret().upper()} \nClick reset to play again :(", 1)
+            self.show_dialog("Game Over!", f"You used up all your guesses.\nThe secret word was {self.vault.getSecret().upper()} \nClick reset to play again :(", 1)
 
         return
     
@@ -118,12 +117,9 @@ class Game():
         self.current_guess_count = 0
         self.isWin = False
         self.isGameOver = False
-        self.validator.setGuessWord()
-        self.reset_ui()
+        self.vault.setGuessWord()
 
         return 
-
-
 
 class WordleClone(toga.App):
 
@@ -132,28 +128,30 @@ class WordleClone(toga.App):
         self.gridsize = 6 # nxn grid
         self.wordsize = 5
         self.alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+        for attr in dir(self):
+            print(attr)
         
         # Generate UI
         self.generate_ui()
 
-        # start Game
-        self.interactables = {
+        # Start Game
+        self.start_game()
+
+    def start_game(self):
+        interactables = {
             'guess_input': self.get_guess_input,
             'row_boxes': self.row_boxes,
-            'reset_ui': self.reset_ui,
             'show_dialog': self.show_dialog,
             'used_letter': self.used_letter
         }
 
-        self.Game = Game(self.gridsize, self.wordsize, self.interactables)
+        self.Game = Game(self.gridsize, self.wordsize, interactables)
 
     def generate_ui(self):
         main_box = toga.Box(style=Pack(direction=COLUMN, alignment="center"))
         
-        guess_label = toga.Label(
-            'Your guess: ',
-            style=Pack(padding=5)
-        )
+        guess_label = toga.Label('Your guess: ', style=Pack(padding=5))
         self.guess_input = toga.TextInput(style=Pack(flex=1))
 
         guess_box = toga.Box(style=Pack(direction=ROW, padding=(5,0)))
@@ -200,6 +198,7 @@ class WordleClone(toga.App):
                 self.row_boxes[i].children[j].style.background_color = "#FAF9F6"
                 self.row_boxes[i].children[j].label = ""
 
+        #reset hints
         for i in range(len(self.alphabet)):
             self.alphaBox.children[i].style.color = '#FAF9F6'
 
@@ -228,6 +227,7 @@ class WordleClone(toga.App):
         return self.Game.do_guess()
         
     def reset_game_handler(self, widget):
+        self.reset_ui()
         return self.Game.resetGame()
 
         
