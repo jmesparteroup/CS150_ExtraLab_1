@@ -4,19 +4,18 @@ Wordle Clone
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
-from pathlib import Path
 from random import randint
 
 class Vault():
 
-    def __init__(self) -> None:
+    def __init__(self,path) -> None:
+        self.resources_folder = f"{path}/resources/ "
         self.guess_list, self.allowed_guesses = self.getGuessData()
         self.setGuessWord()
         
     def getGuessData(self):
-        resources_folder = Path(__file__).joinpath("../resources")
-        guesses = open(resources_folder.joinpath("guesses.txt"), 'r').readlines()
-        allowed_guesses = open(resources_folder.joinpath("allowedguesses.txt"), 'r').readlines()
+        guesses = open(f"{self.resources_folder}guesses.txt", 'r').readlines()
+        allowed_guesses = open(f"{self.resources_folder}allowedguesses.txt", 'r').readlines()
 
         for i in range(len(guesses)):
             guesses[i] = guesses[i].replace('\n', '')
@@ -50,14 +49,14 @@ class Vault():
 
 class Game():
 
-    def __init__(self, gridsize, wordsize, interactables ) -> None:
+    def __init__(self, gridsize, wordsize, interactables, vault) -> None:
         self.gridsize = gridsize
         self.wordsize = wordsize
         self.current_guess_count = 0
         self.isGameOver = False
         self.isWin = False
         
-        self.vault = Vault() 
+        self.vault = vault
 
         self.row_boxes = interactables['row_boxes']
         self.get_guess_input = interactables['guess_input']
@@ -128,6 +127,7 @@ class WordleClone(toga.App):
         self.gridsize = 6 # nxn grid
         self.wordsize = 5
         self.alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        self.vault = Vault(str(self.path.app)) 
 
         for attr in dir(self):
             print(attr)
