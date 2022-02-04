@@ -11,7 +11,7 @@ class Vault():
     def __init__(self,path) -> None:
         self.resources_folder = f"{path}/resources/"
         self.guess_list, self.allowed_guesses = self.getGuessData()
-        self.setGuessWord()
+        self.setSecret()
         
     def getGuessData(self):
         guesses = open(f"{self.resources_folder}guesses.txt", 'r').readlines()
@@ -40,7 +40,7 @@ class Vault():
 
         return [True]
 
-    def setGuessWord(self):
+    def setSecret(self):
         self.secretWord = self.guess_list[randint(0, len(self.guess_list)-1)]
 
     def getSecret(self):
@@ -50,11 +50,12 @@ class Vault():
 class Game():
 
     def __init__(self, gridsize, wordsize, interactables, vault) -> None:
-        self.gridsize = gridsize
-        self.wordsize = wordsize
         self.current_guess_count = 0
         self.isGameOver = False
         self.isWin = False
+
+        self.gridsize = gridsize
+        self.wordsize = wordsize
         
         self.vault = vault
 
@@ -64,9 +65,8 @@ class Game():
         self.used_letter = interactables['used_letter']
     
     def do_guess(self):
-        if self.isGameOver:
-            return
-
+        if self.isGameOver: return
+            
         localSecret = self.vault.getSecret()
         guess = self.get_guess_input()
         score = 0
@@ -78,14 +78,12 @@ class Game():
             self.show_dialog(error_message['invalid_title'], error_message['invalid_body'], 0)
             return 
 
-        
         for i in range(self.wordsize):
             current_box = self.row_boxes[self.current_guess_count].children[i]
             current_box.label = guess[i].upper()
             current_box.style.background_color = '#A9A9A9'
             self.used_letter(guess[i], '#696969')
             
-
             if guess[i] == localSecret[i]:
                 localSecret = localSecret[:i] + '!' + localSecret[i+1:]
                 guess = guess[:i] + '?' + guess[i+1:]
@@ -116,7 +114,7 @@ class Game():
         self.current_guess_count = 0
         self.isWin = False
         self.isGameOver = False
-        self.vault.setGuessWord()
+        self.vault.setSecret()
 
         return 
 
@@ -128,9 +126,6 @@ class WordleClone(toga.App):
         self.wordsize = 5
         self.alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         self.vault = Vault(str(self.paths.app)) 
-
-        for attr in dir(self):
-            print(attr)
         
         # Generate UI
         self.generate_ui()
@@ -216,7 +211,6 @@ class WordleClone(toga.App):
             if self.alphabet[i].lower() == letter:
                 self.alphaBox.children[i].style.color = color
         return
-
 
     def get_guess_input(self):
         guess = self.guess_input.value.lower()
